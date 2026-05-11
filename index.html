@@ -1,4 +1,3 @@
-<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,7 +28,6 @@
       color: #1a1e2c;
     }
 
-    /* ヘッダー・フッターは固定しない（通常フロー） */
     header, footer {
       padding: 1rem 0;
       border-bottom: 1px solid rgba(255,255,255,0.1);
@@ -48,7 +46,6 @@
       border-top-color: rgba(0,0,0,0.1);
     }
 
-    /* ボタンやカード */
     .btn-group {
       display: flex;
       gap: 0.75rem;
@@ -208,7 +205,19 @@
   </footer>
 
   <script>
-    // ---------- 多言語データ ----------
+    // ----------------------------------------------
+    // アイスデータ拡張ガイド
+    // ----------------------------------------------
+    // 1. 新しいアイスを追加するには:
+    //    a) iceDetails オブジェクトに新しいキー（例: "my_new_ice"）を追加し、
+    //       会社名・各国の特徴・食べるポイントを記述してください。
+    //    b) iceEmoji に同じキーと絵文字を追加。
+    //    c) shopRankings の各コンビニ配列の適切な順位（好きな位置）に
+    //       { id: "my_new_ice", name_jp: "...", name_en: "...", name_it: "...", name_ru: "...", company: "..." }
+    //       を追加するだけです。
+    // ----------------------------------------------
+
+    // 多言語データ
     const translations = {
       en: {
         title: "🍨 Ice Ranking",
@@ -260,9 +269,9 @@
       }
     };
 
-    // アイスデータ (会社名, 特徴, 食べるポイント)
+    // アイス詳細データ (ID単位)
     const iceDetails = {
-      "choco_monaka": { company: "森永製菓", personality_ja: "パリパリのモナカと濃厚チョコの絶妙ハーモニー", tips_ja: "軽く冷やしてモナカの食感を楽しむ", personality_en: "Crispy wafer & rich chocolate harmony", tips_en: "Slightly chill for meilleur texture", personality_it: "Cialda croccante e cioccolato ricco", tips_it: "Godere la consistenza croccante", personality_ru: "Хрустящий вафельный стаканчик и насыщенный шоколад", tips_ru: "Наслаждайтесь хрустящей текстурой" },
+      "choco_monaka": { company: "森永製菓", personality_ja: "パリパリのモナカと濃厚チョコの絶妙ハーモニー", tips_ja: "軽く冷やしてモナカの食感を楽しむ", personality_en: "Crispy wafer & rich chocolate harmony", tips_en: "Slightly chill for best texture", personality_it: "Cialda croccante e cioccolato ricco", tips_it: "Godere la consistenza croccante", personality_ru: "Хрустящий вафельный стаканчик и насыщенный шоколад", tips_ru: "Наслаждайтесь хрустящей текстурой" },
       "coolish": { company: "ロッテ", personality_ja: "やわらかシャーベット状で飲む感覚", tips_ja: "ストローで混ぜてから飲む", personality_en: "Soft sorbet-like, drinkable", tips_en: "Stir with straw before drinking", personality_it: "Morbido come sorbetto, si beve", tips_it: "Mescola con la cannuccia", personality_ru: "Мягкий сорбет, можно пить", tips_ru: "Перемешайте соломинкой" },
       "essel_supercup": { company: "明治", personality_ja: "なめらか濃厚バニラ", tips_ja: "少し溶かしてクリーミーに", personality_en: "Smooth & rich vanilla", tips_en: "Let soften for creaminess", personality_it: "Vaniglia cremosa", tips_it: "Lascia ammorbidire", personality_ru: "Нежная насыщенная ваниль", tips_ru: "Дайте немного подтаять" },
       "gari_gari_kun": { company: "赤城乳業", personality_ja: "シャリシャリ食感のソーダ味", tips_ja: "かぶりついて夏に最高", personality_en: "Shari-shari soda flavor", tips_en: "Perfect for hot summer", personality_it: "Ghiacciolo soda croccante", tips_it: "Perfetto d'estate", personality_ru: "Хрустящий содовая вкус", tips_ru: "Отлично в жару" },
@@ -270,9 +279,9 @@
       "giant_corn": { company: "江崎グリコ", personality_ja: "パリパリコーンとチョコ＆アイス", tips_ja: "下のチョコまで味わう", personality_en: "Crispy cone with choc & ice cream", tips_en: "Enjoy chocolate at bottom", personality_it: "Cialda croccante", tips_it: "Assapora il fondo cioccolato", personality_ru: "Хрустящий рожок с шоколадом", tips_ru: "Насладитесь шоколадом на дне" }
     };
 
-    // 各コンビニのランキング（参照用id・表示名・会社）
+    // 各コンビニのランキング（表示名を "7-Eleven" に変更）
     const shopRankings = {
-      "7-11": [
+      "7-Eleven": [
         { id: "choco_monaka", name_jp: "チョコモナカジャンボ", name_en: "Choco Monaka Jumbo", name_it: "Choco Monaka Jumbo", name_ru: "Choco Monaka Jumbo", company: "森永製菓" },
         { id: "coolish", name_jp: "クーリッシュ バニラ", name_en: "Coolish Vanilla", name_it: "Coolish Vanilla", name_ru: "Coolish Vanilla", company: "ロッテ" },
         { id: "essel_supercup", name_jp: "エッセルスーパーカップ 超バニラ", name_en: "Essel Super Cup Vanilla", name_it: "Essel Super Cup Vanilla", name_ru: "Essel Super Cup Vanilla", company: "明治" },
@@ -292,33 +301,30 @@
       ]
     };
 
-    // 絵文字マップ（アイスid→絵文字）
+    // アイス絵文字（拡張時は同じキーを追加）
     const iceEmoji = {
       "choco_monaka": "🍫🍦", "coolish": "🥤🧊", "essel_supercup": "🍦✨", "gari_gari_kun": "🧊🔵", "tabete_bokujo": "🥛🐄", "giant_corn": "🌽🍫"
     };
-    // コンビニ写真プレースホルダー
+
     const shopImages = {
-      "7-11": "🏪", "FamilyMart": "🏪💚", "Lawson": "🏪💙"
+      "7-Eleven": "🏪", "FamilyMart": "🏪💚", "Lawson": "🏪💙"
     };
 
-    let currentLang = "en";   // en, ja, it, ru
-    let currentView = "main"; // main, ranking, detail
+    let currentLang = "en";
+    let currentView = "main";
     let selectedShop = null;
-    let selectedIce = null; // { id, nameObj, company, rankIndex }
+    let selectedIce = null;
 
-    // DOM 要素
     const app = document.getElementById("app");
     const titleEl = document.getElementById("app-title");
     const langSelect = document.getElementById("langSwitcher");
     const themeToggleBtn = document.getElementById("themeToggle");
 
-    // ヘルパー: 多言語取得
     function t(key) {
       return translations[currentLang][key] || key;
     }
 
-    // アイスの表示名取得
-    function getIceName(ice, shopKey=null) {
+    function getIceName(ice) {
       if (currentLang === "ja") return ice.name_jp;
       if (currentLang === "it") return ice.name_it || ice.name_en;
       if (currentLang === "ru") return ice.name_ru || ice.name_en;
@@ -347,7 +353,6 @@
       return d.tips_en;
     }
 
-    // 描画メイン
     function render() {
       titleEl.innerText = translations[currentLang].title;
       const contactLink = document.getElementById("contact-text");
@@ -393,7 +398,7 @@
               <div class="ice-rank">${idx+1}</div>
               <div class="ice-emoji">${iceEmoji[ice.id] || "🍨"}</div>
               <div class="ice-info">
-                <div class="ice-name">${getIceName(ice, selectedShop)}</div>
+                <div class="ice-name">${getIceName(ice)}</div>
                 <div class="company">${ice.company}</div>
               </div>
             </div>
@@ -424,7 +429,7 @@
       const companyName = getCompanyName(iceId);
       const personality = getPersonality(iceId);
       const tips = getTips(iceId);
-      const iceDisplayName = getIceName(ice, selectedIce.shop);
+      const iceDisplayName = getIceName(ice);
       app.innerHTML = `
         <div class="back-row">
           <button class="back-btn" id="backToRankingBtn">← ${t("back")}</button>
@@ -451,14 +456,12 @@
       });
     }
 
-    // 言語切り替え
     function setLanguage(lang) {
       currentLang = lang;
       render();
       localStorage.setItem("lang", lang);
     }
 
-    // テーマ切り替え
     function initTheme() {
       const savedTheme = localStorage.getItem("theme");
       const isDark = savedTheme === "dark" || (savedTheme === null && true);
@@ -486,7 +489,6 @@
       }
     }
 
-    // 言語セレクタ生成
     function populateLangSelect() {
       langSelect.innerHTML = `
         <option value="en">🇬🇧 English</option>
@@ -498,7 +500,18 @@
       langSelect.addEventListener("change", (e) => setLanguage(e.target.value));
     }
 
-    // ページスタート
+    // ---------- Service Worker 登録（PWAインストール対応） ----------
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+          console.log('Service Worker registered:', reg);
+        }).catch(err => {
+          console.error('SW registration failed:', err);
+        });
+      });
+    }
+
+    // 初期化
     const savedLang = localStorage.getItem("lang");
     if(savedLang && translations[savedLang]) currentLang = savedLang;
     populateLangSelect();

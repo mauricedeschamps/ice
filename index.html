@@ -208,6 +208,9 @@
     .fallback-emoji {
       font-size: 2.5rem;
       line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
   </style>
 </head>
@@ -230,13 +233,11 @@
 
   <script>
     // --------------------------------------------------------------
-    // 拡張ガイド
-    // --------------------------------------------------------------
-    // 1. 新しいアイスを追加するには:
-    //    a) iceDetails に新キーを追加 (id)。必須: company, personality_*, tips_*, image_url, official_url
-    //    b) shopRankings の各コンビニ配列に { id, name_jp, name_en, name_it, name_ru, company } を追加
-    //    c) オプション: iceEmoji に絵文字を設定（画像がない場合のフォールバック）
-    // 2. コンビニ画像を設定: shopImageUrls にURLを記入（空の場合は絵文字フォールバック）
+    // 画像は images/ フォルダに保存してください
+    // コンビニ画像: images/7eleven.jpg , images/familymart.jpg , images/lawson.jpg
+    // アイス画像: images/choco_monaka.jpg , images/coolish.jpg , images/essel_supercup.jpg ,
+    //            images/gari_gari_kun.jpg , images/tabete_bokujo.jpg , images/giant_corn.jpg
+    // 存在しない場合は絵文字がフォールバック表示されます
     // --------------------------------------------------------------
 
     // 多言語データ
@@ -295,7 +296,7 @@
       }
     };
 
-    // アイス詳細データ (ID単位) - image_url / official_url を追加
+    // アイス詳細データ (ID単位)
     const iceDetails = {
       "choco_monaka": {
         company: "森永製菓",
@@ -303,7 +304,6 @@
         personality_en: "Crispy wafer & rich chocolate harmony", tips_en: "Slightly chill for best texture",
         personality_it: "Cialda croccante e cioccolato ricco", tips_it: "Godere la consistenza croccante",
         personality_ru: "Хрустящий вафельный стаканчик и насыщенный шоколад", tips_ru: "Наслаждайтесь хрустящей текстурой",
-        image_url: "",  // ここに画像URLを設定（例: "https://example.com/choco_monaka.jpg"）
         official_url: "https://www.morinaga.co.jp/product/ice/chi_jumbo/"
       },
       "coolish": {
@@ -312,7 +312,6 @@
         personality_en: "Soft sorbet-like, drinkable", tips_en: "Stir with straw before drinking",
         personality_it: "Morbido come sorbetto, si beve", tips_it: "Mescola con la cannuccia",
         personality_ru: "Мягкий сорбет, можно пить", tips_ru: "Перемешайте соломинкой",
-        image_url: "",
         official_url: "https://www.lotte.co.jp/products/detail/coolish/"
       },
       "essel_supercup": {
@@ -321,7 +320,6 @@
         personality_en: "Smooth & rich vanilla", tips_en: "Let soften for creaminess",
         personality_it: "Vaniglia cremosa", tips_it: "Lascia ammorbidire",
         personality_ru: "Нежная насыщенная ваниль", tips_ru: "Дайте немного подтаять",
-        image_url: "",
         official_url: "https://www.meiji.co.jp/sweets/icecream/essel/"
       },
       "gari_gari_kun": {
@@ -330,7 +328,6 @@
         personality_en: "Shari-shari soda flavor", tips_en: "Perfect for hot summer",
         personality_it: "Ghiacciolo soda croccante", tips_it: "Perfetto d'estate",
         personality_ru: "Хрустящий содовая вкус", tips_ru: "Отлично в жару",
-        image_url: "",
         official_url: "https://www.akagi-nyugyo.co.jp/garigari/"
       },
       "tabete_bokujo": {
@@ -339,7 +336,6 @@
         personality_en: "Rich milky flavor", tips_en: "Enjoy as is",
         personality_it: "Ricco latte", tips_it: "Goditi così com'è",
         personality_ru: "Насыщенный молочный вкус", tips_ru: "Наслаждайтесь просто так",
-        image_url: "",
         official_url: "https://www.akagi-nyugyo.co.jp/tabetebokujo/"
       },
       "giant_corn": {
@@ -348,16 +344,15 @@
         personality_en: "Crispy cone with choc & ice cream", tips_en: "Enjoy chocolate at bottom",
         personality_it: "Cialda croccante", tips_it: "Assapora il fondo cioccolato",
         personality_ru: "Хрустящий рожок с шоколадом", tips_ru: "Насладитесь шоколадом на дне",
-        image_url: "",
         official_url: "https://www.glico.com/jp/product/giant_corn/"
       }
     };
 
-    // コンビニの画像URL (空なら絵文字フォールバック)
-    const shopImageUrls = {
-      "7-Eleven": "",   // 例: "https://example.com/7eleven.jpg"
-      "FamilyMart": "",
-      "Lawson": ""
+    // コンビニ画像ファイル名（imagesフォルダからの相対パス）
+    const shopImageFiles = {
+      "7-Eleven": "7eleven.jpg",
+      "FamilyMart": "familymart.jpg",
+      "Lawson": "lawson.jpg"
     };
 
     // アイスのフォールバック絵文字
@@ -408,6 +403,31 @@
       return ice.name_en;
     }
 
+    // 画像表示ヘルパー（ローカル images フォルダから読み込み、フォールバック絵文字）
+    function getImageHtml(imgPath, fallbackEmoji, className, alt) {
+      if (!imgPath) {
+        return `<div class="fallback-emoji ${className}">${fallbackEmoji}</div>`;
+      }
+      // onerror でロード失敗時に絵文字に置き換え
+      return `<img src="${imgPath}" class="${className}" alt="${alt}" 
+                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'fallback-emoji ${className}\\' style=\\'display:flex;align-items:center;justify-content:center;\\'>${fallbackEmoji}</div>'">`;
+    }
+
+    // コンビニ画像パスを取得（ファイルが存在しない可能性もあるので fallback 付き）
+    function getShopImageHtml(shopKey, className) {
+      const fileName = shopImageFiles[shopKey];
+      const imgPath = fileName ? `images/${fileName}` : null;
+      const fallbackEmoji = shopKey === "7-Eleven" ? "🏪" : (shopKey === "FamilyMart" ? "🏪💚" : "🏪💙");
+      return getImageHtml(imgPath, fallbackEmoji, className, shopKey);
+    }
+
+    // アイス画像パスを取得（ice.id + .jpg を images/ から探す）
+    function getIceImageHtml(iceId, className) {
+      const imgPath = `images/${iceId}.jpg`;
+      const emoji = iceEmoji[iceId] || "🍨";
+      return getImageHtml(imgPath, emoji, className, iceId);
+    }
+
     function render() {
       titleEl.innerText = translations[currentLang].title;
       const contactLink = document.getElementById("contact-text");
@@ -417,30 +437,17 @@
       else if(currentView === "detail") renderDetail();
     }
 
-    // 画像表示ヘルパー（fallback絵文字）
-    function renderImage(url, emoji, className, alt="image") {
-      if(url && url.trim() !== "") {
-        return `<img src="${url}" class="${className}" alt="${alt}" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'fallback-emoji ${className}\' style=\'display:flex;align-items:center;justify-content:center;\'>${emoji}</div>'">`;
-      } else {
-        return `<div class="fallback-emoji ${className}" style="display:flex;align-items:center;justify-content:center;">${emoji}</div>`;
-      }
-    }
-
     function renderMain() {
       const shops = Object.keys(shopRankings);
       app.innerHTML = `
         <h2>${t("shops")}</h2>
         <div class="grid">
-          ${shops.map(shop => {
-            const shopEmoji = shopImageUrls[shop] ? "" : (shop === "7-Eleven" ? "🏪" : (shop === "FamilyMart" ? "🏪💚" : "🏪💙"));
-            const imgHtml = shopImageUrls[shop] ? renderImage(shopImageUrls[shop], shopEmoji || "🏪", "shop-img", shop) : `<div class="fallback-emoji shop-img">${shopEmoji || "🏪"}</div>`;
-            return `
-              <button class="shop-btn" data-shop="${shop}">
-                ${imgHtml}
-                <div class="shop-name">${shop}</div>
-              </button>
-            `;
-          }).join("")}
+          ${shops.map(shop => `
+            <button class="shop-btn" data-shop="${shop}">
+              ${getShopImageHtml(shop, "shop-img")}
+              <div class="shop-name">${shop}</div>
+            </button>
+          `).join("")}
         </div>
       `;
       document.querySelectorAll("[data-shop]").forEach(btn => {
@@ -461,21 +468,16 @@
         </div>
         <h2>${selectedShop} - ${t("ranking")}</h2>
         <div>
-          ${ranking.map((ice, idx) => {
-            const detail = iceDetails[ice.id] || {};
-            const imgUrl = detail.image_url || "";
-            const emoji = iceEmoji[ice.id] || "🍨";
-            return `
-              <div class="ice-card" data-ice-idx="${idx}">
-                <div class="ice-rank">${idx+1}</div>
-                ${imgUrl ? renderImage(imgUrl, emoji, "ice-img", ice.name_en) : `<div class="fallback-emoji ice-img">${emoji}</div>`}
-                <div class="ice-info">
-                  <div class="ice-name">${getIceName(ice)}</div>
-                  <div class="company">${ice.company}</div>
-                </div>
+          ${ranking.map((ice, idx) => `
+            <div class="ice-card" data-ice-idx="${idx}">
+              <div class="ice-rank">${idx+1}</div>
+              ${getIceImageHtml(ice.id, "ice-img")}
+              <div class="ice-info">
+                <div class="ice-name">${getIceName(ice)}</div>
+                <div class="company">${ice.company}</div>
               </div>
-            `;
-          }).join("")}
+            </div>
+          `).join("")}
         </div>
       `;
       ranking.forEach((ice, idx) => {
@@ -504,8 +506,6 @@
       const personality = (currentLang === "ja" ? detail.personality_ja : (currentLang === "it" ? detail.personality_it : (currentLang === "ru" ? detail.personality_ru : detail.personality_en))) || "";
       const tips = (currentLang === "ja" ? detail.tips_ja : (currentLang === "it" ? detail.tips_it : (currentLang === "ru" ? detail.tips_ru : detail.tips_en))) || "";
       const iceDisplayName = getIceName(ice);
-      const imgUrl = detail.image_url || "";
-      const emoji = iceEmoji[iceId] || "🍨";
       const officialUrl = detail.official_url || "";
 
       app.innerHTML = `
@@ -514,7 +514,7 @@
           <button class="back-btn" id="detailHomeBtn">🏠 ${t("backHome")}</button>
         </div>
         <div class="detail-container">
-          ${imgUrl ? renderImage(imgUrl, emoji, "detail-img", iceDisplayName) : `<div class="fallback-emoji detail-img">${emoji}</div>`}
+          ${getIceImageHtml(iceId, "detail-img")}
           <h2>${iceDisplayName}</h2>
           <p><strong>${t("company")}:</strong> ${companyName}</p>
           <p><strong>${t("personality")}:</strong> ${personality}</p>
@@ -579,7 +579,7 @@
       langSelect.addEventListener("change", (e) => setLanguage(e.target.value));
     }
 
-    // Service Worker 登録
+    // Service Worker 登録（PWAインストール対応）
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(reg => {

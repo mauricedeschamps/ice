@@ -211,6 +211,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      background: transparent;
+    }
+    .ice-img.fallback-emoji, .shop-img.fallback-emoji, .detail-img.fallback-emoji {
+      background: #3a3a4a;
+      border-radius: 16px;
     }
   </style>
 </head>
@@ -240,7 +245,6 @@
     // 存在しない場合は絵文字がフォールバック表示されます
     // --------------------------------------------------------------
 
-    // 多言語データ
     const translations = {
       en: {
         title: "🍨 Ice Ranking",
@@ -296,7 +300,6 @@
       }
     };
 
-    // アイス詳細データ (ID単位)
     const iceDetails = {
       "choco_monaka": {
         company: "森永製菓",
@@ -348,19 +351,16 @@
       }
     };
 
-    // コンビニ画像ファイル名（imagesフォルダからの相対パス）
     const shopImageFiles = {
       "7-Eleven": "7eleven.jpg",
       "FamilyMart": "familymart.jpg",
       "Lawson": "lawson.jpg"
     };
 
-    // アイスのフォールバック絵文字
     const iceEmoji = {
       "choco_monaka": "🍫🍦", "coolish": "🥤🧊", "essel_supercup": "🍦✨", "gari_gari_kun": "🧊🔵", "tabete_bokujo": "🥛🐄", "giant_corn": "🌽🍫"
     };
 
-    // 各コンビニのランキング
     const shopRankings = {
       "7-Eleven": [
         { id: "choco_monaka", name_jp: "チョコモナカジャンボ", name_en: "Choco Monaka Jumbo", name_it: "Choco Monaka Jumbo", name_ru: "Choco Monaka Jumbo", company: "森永製菓" },
@@ -403,17 +403,48 @@
       return ice.name_en;
     }
 
-    // 画像表示ヘルパー（ローカル images フォルダから読み込み、フォールバック絵文字）
+    // 画像表示関数 (エラー時にフォールバック絵文字に置き換える)
+    function createImageElement(src, className, fallbackEmoji, alt) {
+      const container = document.createElement('div');
+      container.style.position = 'relative';
+      container.style.display = 'inline-flex';
+      container.style.alignItems = 'center';
+      container.style.justifyContent = 'center';
+      
+      const img = new Image();
+      img.className = className;
+      img.alt = alt;
+      img.style.width = '100%';
+      img.style.height = '100%';
+      img.style.objectFit = 'cover';
+      
+      img.onerror = () => {
+        // 画像読み込み失敗時、絵文字を表示
+        const emojiDiv = document.createElement('div');
+        emojiDiv.className = `fallback-emoji ${className}`;
+        emojiDiv.textContent = fallbackEmoji;
+        emojiDiv.style.display = 'flex';
+        emojiDiv.style.alignItems = 'center';
+        emojiDiv.style.justifyContent = 'center';
+        container.parentNode?.replaceChild(emojiDiv, container);
+      };
+      
+      img.src = src;
+      container.appendChild(img);
+      return container;
+    }
+
     function getImageHtml(imgPath, fallbackEmoji, className, alt) {
       if (!imgPath) {
         return `<div class="fallback-emoji ${className}">${fallbackEmoji}</div>`;
       }
-      // onerror でロード失敗時に絵文字に置き換え
+      // Divコンテナを作成するためのダミー要素 (innerHTMLで使えるように簡易版)
+      // 実際にはcreateElementを使うが、innerHTML内で動的に生成するのは難しいので、
+      // onerrorで自分自身を置き換える方法を取る (imgタグそのものを置き換え)
       return `<img src="${imgPath}" class="${className}" alt="${alt}" 
-                   onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'fallback-emoji ${className}\\' style=\\'display:flex;align-items:center;justify-content:center;\\'>${fallbackEmoji}</div>'">`;
+                   onerror="this.onerror=null; this.parentElement.innerHTML = '<div class=\\'fallback-emoji ${className}\\' style=\\'display:flex;align-items:center;justify-content:center;\\'>${fallbackEmoji}</div>';">`;
     }
 
-    // コンビニ画像パスを取得（ファイルが存在しない可能性もあるので fallback 付き）
     function getShopImageHtml(shopKey, className) {
       const fileName = shopImageFiles[shopKey];
       const imgPath = fileName ? `images/${fileName}` : null;
@@ -421,7 +452,6 @@
       return getImageHtml(imgPath, fallbackEmoji, className, shopKey);
     }
 
-    // アイス画像パスを取得（ice.id + .jpg を images/ から探す）
     function getIceImageHtml(iceId, className) {
       const imgPath = `images/${iceId}.jpg`;
       const emoji = iceEmoji[iceId] || "🍨";
